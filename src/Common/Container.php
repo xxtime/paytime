@@ -23,6 +23,6 @@ class Container
         if (isset($this->s[$k])) {
             return $this->s[$k];
         }
-        throw new Exception("DI Error, no argv [{$k}]");
+        throw new Exception("DI Error, undefine [{$k}]");
     }
 }
