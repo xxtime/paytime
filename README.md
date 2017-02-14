@@ -6,9 +6,8 @@ PayTime移动支付SDK
 ## 功能
 * 规范优雅命名
 * 符合PSR标准
-* 支持多种网关支付
+* 支持多种网关支付 Apple Pay, Google Pay, Alipay, WeixinPay
 * 统一网关程序
-* 订单ID自动生成(日期+自增序列+随机数), 需要Redis支持
 
 ## 所需环境
 PHP >= 5.5  
@@ -25,7 +24,7 @@ composer require "xxtime/paytime:dev-master"
 ```php
 <?php
 
-use Xxtime\PayTime\Core\PayTime;
+use Xxtime\PayTime\PayTime;
 
 $payTime = new PayTime('Alipay_Wap');
 
@@ -54,7 +53,7 @@ $payTime->send();
 ```php
 <?php
 
-use Xxtime\PayTime\Core\PayTime;
+use Xxtime\PayTime\PayTime;
 
 // 订单验证
 $payTime = new PayTime('Alipay');
