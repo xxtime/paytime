@@ -1,0 +1,31 @@
+{
+  "name": "xxtime/paytime",
+  "type": "library",
+  "description": "移动支付SDK,Apple Pay,Google Pay",
+  "keywords": [
+    "支付",
+    "payment"
+  ],
+  "homepage": "https://github.com/xxtime/paytime",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Joe Chu",
+      "email": "joe@xxtime.com"
+    }
+  ],
+  "support": {
+    "email": "joe@xxtime.com",
+    "wiki": "https://wiki.xxtime.com"
+  },
+  "require": {
+    "php": ">=5.5.0",
+    "symfony/http-foundation": "~2|~3",
+    "lokielse/omnipay-alipay": "~2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Xxtime\\PayTime\\": "src/"
+    }
+  }
+}
