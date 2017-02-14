@@ -22,6 +22,9 @@ class PayTime
     {
         $this->di = new Container();
         $this->di->provider = function () use ($provider) {
+            if (strpos($provider, '_') === false) {
+                $provider .= '_Wap'; // 默认Wap
+            }
             $class = '\Xxtime\\PayTime\\Providers\\' . $provider;
             return new $class();
         };
@@ -52,9 +55,12 @@ class PayTime
     }
 
 
+    /**
+     * @return array(transactionId, transactionReference, isSuccessful,'message);
+     */
     public function notify()
     {
-        $this->di->provider->notify();
+        return $this->di->provider->notify();
     }
 
 }

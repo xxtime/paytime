@@ -7,6 +7,7 @@ namespace Xxtime\PayTime\Providers;
 
 
 use Omnipay\Omnipay;
+use Exception;
 
 class Alipay_Wap
 {
@@ -61,6 +62,33 @@ class Alipay_Wap
 
     public function notify()
     {
+        $request = $this->provider->completePurchase();
+        $argv = array_merge($_POST, $_GET);
+        $argv['sign'] = str_replace(' ', '+', $argv['sign']);
+        $request->setParams($argv);
+
+        try {
+            $response = $request->send();
+            if (!$response->isPaid()) {
+                throw new Exception('sorry failed');
+            }
+
+            $result = [
+                'transactionId'        => $response->getData()['out_trade_no'],
+                'transactionReference' => $response->getData()['trade_no'],
+                'isSuccessful'         => true,
+                'message'              => 'success',
+            ];
+            return $result;
+        } catch (Exception $e) {
+            $result = [
+                'transactionId'        => $response->getData()['out_trade_no'],
+                'transactionReference' => $response->getData()['trade_no'],
+                'isSuccessful'         => false,
+                'message'              => 'failed',
+            ];
+            return $result;
+        }
     }
 
 }
