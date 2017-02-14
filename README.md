@@ -74,5 +74,5 @@ amount  | decimal(10,2) | 金额
 currency  | varchar(32) | 币种
 
 ## 关于项目
-主页: [https://github.com/xxtime/PayTime](https://github.com/xxtime/PayTime)  
+主页: [https://github.com/xxtime/paytime](https://github.com/xxtime/paytime)  
 作者: [https://www.xxtime.com](https://www.xxtime.com)  
