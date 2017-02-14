@@ -11,7 +11,11 @@ class Container
 
     function __set($k, $c)
     {
-        $this->s[$k] = $c($this);
+        if ($c instanceof \Closure) {
+            $this->s[$k] = $c($this);
+        } else {
+            $this->s[$k] = $c;
+        }
     }
 
     function __get($k)
