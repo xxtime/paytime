@@ -33,6 +33,7 @@ class Alipay_Wap
         $this->provider->setPrivateKey($option['privateKey']);
         $this->provider->setAlipayPublicKey($option['publicKey']);
         $this->provider->setNotifyUrl($option['notifyUrl']);
+        $this->provider->setReturnUrl($option['returnUrl']);
     }
 
 
