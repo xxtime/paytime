@@ -23,7 +23,7 @@ class PayTime
         $this->di = new Container();
         $this->di->provider = function () use ($provider) {
             if (!file_exists(__DIR__ . '/Providers/' . $provider . '.php')) {
-                $provider .= '_Wap'; // 默认Wap
+                $provider .= '_wap'; // 默认Wap
             }
             $class = '\Xxtime\\PayTime\\Providers\\' . $provider;
             return new $class();
