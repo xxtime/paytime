@@ -9,7 +9,7 @@ namespace Xxtime\PayTime\Providers;
 use Omnipay\Omnipay;
 use Exception;
 
-class Alipay_Wap
+class Alipay_wap
 {
 
     private $provider;
