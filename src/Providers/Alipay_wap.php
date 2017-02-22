@@ -29,11 +29,11 @@ class Alipay_wap
      */
     public function setOption($option = [])
     {
-        $this->provider->setAppId($option['appId']);
-        $this->provider->setPrivateKey($option['privateKey']);
-        $this->provider->setAlipayPublicKey($option['publicKey']);
-        $this->provider->setNotifyUrl($option['notifyUrl']);
-        $this->provider->setReturnUrl($option['returnUrl']);
+        $this->provider->setAppId($option['app_id']);
+        $this->provider->setPrivateKey($option['private_key']);
+        $this->provider->setAlipayPublicKey($option['public_key']);
+        $this->provider->setNotifyUrl($option['notify_url']);
+        $this->provider->setReturnUrl($option['return_url']);
     }
 
 
