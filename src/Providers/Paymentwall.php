@@ -27,7 +27,7 @@ class Paymentwall
         $this->_config = $option;
 
         $this->_trade['key'] = $option['app_id'];
-        $this->_trade['widget'] = 'fp';             // 样式 m2_1,p2,m2,p1,m2_1,p1_1,fp
+        $this->_trade['widget'] = 'm2';             // 样式 m2,m2_1,p1,p1_1,p2,fp; fp要求录入信息
         $this->_trade['ag_type'] = 'fixed';         // fixed / subscription, 固定产品或活动产品
 
         /*
