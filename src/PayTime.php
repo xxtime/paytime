@@ -63,4 +63,16 @@ class PayTime
         return $this->di->provider->notify();
     }
 
+
+    /**
+     * 输出
+     * @return bool
+     */
+    public function success()
+    {
+        if (method_exists($this->di->provider, 'success')) {
+            $this->di->provider->success();
+        }
+    }
+
 }
