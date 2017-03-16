@@ -110,10 +110,11 @@ class Paymentwall
 
         // 成功返回
         $result = [
-            'transactionId'        => $req['uid'],
-            'transactionReference' => $req['ref'],
             'isSuccessful'         => true,
             'message'              => 'success',
+            'transactionId'        => $req['uid'],
+            'transactionReference' => $req['ref'],
+            'raw'                  => $req,
         ];
         if (isset($req['is_test'])) {
             $result['sandbox'] = true;

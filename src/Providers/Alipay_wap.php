@@ -75,18 +75,19 @@ class Alipay_wap
             }
 
             $result = [
-                'transactionId'        => $response->getData()['out_trade_no'],
-                'transactionReference' => $response->getData()['trade_no'],
                 'isSuccessful'         => true,
                 'message'              => 'success',
+                'transactionId'        => $response->getData()['out_trade_no'],
+                'transactionReference' => $response->getData()['trade_no'],
+                'raw'                  => $argv,
             ];
             return $result;
         } catch (Exception $e) {
             $result = [
-                'transactionId'        => $_REQUEST['out_trade_no'],
-                'transactionReference' => $_REQUEST['trade_no'],
                 'isSuccessful'         => false,
                 'message'              => $e->getMessage(),
+                'transactionId'        => $_REQUEST['out_trade_no'],
+                'transactionReference' => $_REQUEST['trade_no'],
             ];
             return $result;
         }
