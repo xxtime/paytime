@@ -20,13 +20,21 @@ class PayTime
      */
     public function __construct($provider = '')
     {
+        $offset = strpos($provider, '_');
+        if ($offset) {
+            $gateway = substr($provider, 0, $offset);
+            $sub = substr($provider, -$offset);
+        } else {
+            $gateway = $provider;
+            $sub = '';
+        }
         $this->di = new Container();
-        $this->di->provider = function () use ($provider) {
-            if (!file_exists(__DIR__ . '/Providers/' . $provider . '.php')) {
-                $provider .= '_wap'; // 默认Wap
+        $this->di->provider = function () use ($gateway, $sub) {
+            if (!file_exists(__DIR__ . '/Providers/' . $gateway . '.php')) {
+                throw new \Exception('no providers found');
             }
-            $class = '\Xxtime\\PayTime\\Providers\\' . $provider;
-            return new $class();
+            $class = '\Xxtime\\PayTime\\Providers\\' . $gateway;
+            return new $class($sub);
         };
     }
 
