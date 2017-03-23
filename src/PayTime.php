@@ -23,7 +23,7 @@ class PayTime
         $offset = strpos($provider, '_');
         if ($offset) {
             $gateway = substr($provider, 0, $offset);
-            $sub = substr($provider, -$offset);
+            $sub = substr($provider, $offset + 1);
         } else {
             $gateway = $provider;
             $sub = '';
