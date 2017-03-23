@@ -1,6 +1,12 @@
 <?php
 
 
+/**
+ * 获得Mol开发信息后(applicationCode)
+ * 需要向Mol提供以下信息:
+ * 回调地址 Callback URL
+ * IP白名单 IP Address
+ */
 namespace Xxtime\PayTime\Providers;
 
 
@@ -112,11 +118,57 @@ class Mol
 
     /**
      * 回调
+     * 成功则返回 HTTP Status Code 200
      * MOL Global API v1.20 4.1.4
-     * /notify/mol?applicationCode=cHrhUfPRPT6UEZ57PUzawwKBcS3t1GJT&referenceId=F3220516-A5BE-2EB8-BBF1-CEDEA86BB4D4&paymentId=MPO362941&version=v1&amount=1500&currencyCode=USD&paymentStatusCode=00&paymentStatusDate=2016-07-08T05:12:43Z&customerId=100001_123456_100_12345678&signature=40f1990c76b71049722efa328945fbcf&VirtualCurrencyAmount=
+     * 如通知失败MOL会在24小时重新通知3次
+     * applicationCode=3f2504e04f8911d39a0c0305e82c3301&referenceId=TRX1708901&paymentId=MPO000000000001&version=v1&amount=1000&currencyCode=MYR&paymentStatusCode=00&paymentStatusDate=2012-12-31T14%3A59%3A59Z&customerId=12321144221&signature=67626c0bde4e0cf66658fa403b91bf57
      */
     public function notify()
     {
+        $req = $_REQUEST;
+        $sign = $req['signature'];
+        unset($req['_url']);
+        unset($req['signature']);
+        $verify_sign = $this->createSign($req, $this->app_key);
+
+
+        // 验签不通过
+        if ($sign != $verify_sign) {
+            return [
+                'transactionId'        => $req['referenceId'],
+                'transactionReference' => $req['paymentId'],
+                'isSuccessful'         => false,
+                'message'              => 'sign failed',
+            ];
+        }
+
+
+        // 订单不成功
+        if ($req['paymentStatusCode'] != '00') {
+            return [
+                'transactionId'        => $req['referenceId'],
+                'transactionReference' => $req['paymentId'],
+                'isSuccessful'         => false,
+                'message'              => 'not complete',
+            ];
+        }
+
+
+        // 成功返回
+        $result = [
+            'isSuccessful'         => true,
+            'message'              => 'success',
+            'transactionId'        => $req['referenceId'],
+            'transactionReference' => $req['paymentId'],
+            'amount'               => intval($req['amount'] / 100),
+            'currency'             => $req['currencyCode'],
+            'raw'                  => $req,
+        ];
+
+        // TODO :: 沙箱状态
+        // $result['sandbox'] = true;
+
+        return $result;
     }
 
 
@@ -127,7 +179,7 @@ class Mol
     }
 
 
-    private function createSign($data = array(), $signKey = '')
+    private function createSign($data = [], $signKey = '')
     {
         ksort($data);
         $string = '';
