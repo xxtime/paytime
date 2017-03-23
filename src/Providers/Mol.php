@@ -13,9 +13,9 @@ class Mol
 
     private $return_url;
 
-    private $channel;
+    private $channel;   // 网关渠道
 
-    private $redirect;
+    private $redirect;  // 跳转URL
 
     private $endpoint_sandbox = "https://sandbox-api.mol.com/payout/payments";
 
@@ -33,6 +33,9 @@ class Mol
         $this->app_id = $option['app_id'];
         $this->app_key = $option['app_key'];
         $this->return_url = $option['return_url'];
+        if (isset($option['sandbox']) && $option['sandbox'] == 1) {
+            $this->endpoint = $this->endpoint_sandbox;
+        }
     }
 
 
@@ -53,13 +56,11 @@ class Mol
         $data['returnUrl'] = $this->return_url;             // 必须
         $data['description'] = $option['productDesc'];      // 产品描述,可选
         $data['customerId'] = $option['custom'];            // 自定义
-
         // 不指定则使用预付费卡或者运营商计费
         if (!empty($option['productId'])) {
             $data['amount'] = intval($option['amount'] * 100);  // 单位分
             $data['currencyCode'] = $option['currency'];        // 货币类型与amount对应 http://www.xe.com/iso4217.php
         }
-
         $data['signature'] = $this->createSign($data, $this->app_key); // 签名
 
 
@@ -76,6 +77,12 @@ class Mol
         }
         curl_close($ch);
         $result = json_decode($output, true);
+
+
+        // 异常错误
+        if (!isset($result['paymentUrl'])) {
+            throw new \Exception($result['message']);
+        }
 
         /*
          * 返回结构
