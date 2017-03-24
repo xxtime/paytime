@@ -30,11 +30,15 @@ class PayTime
         }
         $this->di = new Container();
         $this->di->provider = function () use ($gateway, $sub) {
-            if (!file_exists(__DIR__ . '/Providers/' . $gateway . '.php')) {
-                throw new \Exception('no providers found');
+            if (file_exists(__DIR__ . '/Providers/' . $gateway . '.php')) {
+                $class = '\Xxtime\\PayTime\\Providers\\' . $gateway;
+                return new $class($sub);
             }
-            $class = '\Xxtime\\PayTime\\Providers\\' . $gateway;
-            return new $class($sub);
+            if (file_exists(__DIR__ . '/Providers/' . $gateway . '/Adapter.php')) {
+                $class = '\Xxtime\\PayTime\\Providers\\' . $gateway . '\\Adapter';
+                return new $class($sub);
+            }
+            throw new \Exception('no providers found');
         };
     }
 
