@@ -24,6 +24,12 @@ class Wallet
 
     private $endpoint_confirm = 'https://b2b.mycard520.com.tw/MyCardPointPaymentServices/MyCardPpServices.asmx/MemberCostListRender';
 
+    private $auth_code;             // MyCard Auth Code
+
+    private $transactionReference;  // MyCard transaction Reference
+
+    private $redirect;
+
     private $config;
 
     private $parameter;
@@ -52,10 +58,10 @@ class Wallet
 
 
     /**
-     * 1. 获取交易授权吗
-     * 2. 跳转到MyCard
+     * 获取交易授权吗
+     * @throws \Exception
      */
-    public function send()
+    private function getAuthCode()
     {
         $err_no = [
             '1'   => '成功',
@@ -78,17 +84,46 @@ class Wallet
             $msg = $err_no[$response['ReturnMsgNo']];
             throw new \Exception($msg);
         }
-        // TODO :: 文件存储 VS 数据库存储
-        $transactionReference = $response['ReturnTradeSeq'];    // 交易ID For MyCard
-        $transactionKey = $response['ReturnAuthCode'];          // 交易授权码
 
 
-        // 跳转
+        // 跳转URL
         if ($this->config['sandbox']) {
             $this->endpoint_login = $this->sandbox_endpoint_login;
         }
-        $url = $this->endpoint_login . '?AuthCode=' . $transactionKey;
-        header('Location:' . $url);
+
+        $this->redirect = $this->endpoint_login . '?AuthCode=' . $this->auth_code;
+        $this->transactionReference = $response['ReturnTradeSeq'];  // 交易ID For MyCard
+        $this->auth_code = $response['ReturnAuthCode'];             // 交易授权码
+    }
+
+
+    /**
+     * @return array
+     * @throws \Exception
+     */
+    public function send()
+    {
+        if (!$this->auth_code) {
+            $this->getAuthCode();
+        }
+
+        return [
+            'redirect'             => $this->redirect,
+            'transactionReference' => $this->transactionReference,
+            'auth_code'            => $this->auth_code,
+        ];
+    }
+
+
+    /**
+     * @throws \Exception
+     */
+    public function redirect()
+    {
+        if (!$this->auth_code) {
+            $this->getAuthCode();
+        }
+        header('Location:' . $this->redirect);
         exit;
     }
 
@@ -120,7 +155,7 @@ class Wallet
         $code = $_REQUEST['ReturnMsgNo'];
         $transactionId = $_REQUEST['FactorySeq'];
         $OTP = $_REQUEST['OTP'];
-        $transactionKey = $_REQUEST['AuthCode'];
+        $auth_code = $_REQUEST['AuthCode'];
         if ($code != 1) {
             $msg = $err_no[$code];
             throw new \Exception($msg);
@@ -139,7 +174,7 @@ class Wallet
         if ($this->config['sandbox']) {
             $this->endpoint_confirm = $this->sandbox_endpoint_confirm;
         }
-        $param = ['AuthCode' => $transactionKey, 'OneTimePassword' => $OTP];
+        $param = ['AuthCode' => $auth_code, 'OneTimePassword' => $OTP];
         $this->endpoint_confirm .= '?' . http_build_query($param);
         $response = file_get_contents($this->endpoint_confirm);
         $response = $this->xml2array($response);

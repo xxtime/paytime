@@ -45,7 +45,13 @@ class Adapter
 
     public function send()
     {
-        $this->provider->send();
+        return $this->provider->send();
+    }
+
+
+    public function redirect()
+    {
+        $this->provider->redirect();
     }
 
 

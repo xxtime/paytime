@@ -63,7 +63,15 @@ class PayTime
 
     public function send()
     {
-        $this->di->provider->send();
+        return $this->di->provider->send();
+    }
+
+
+    public function redirect()
+    {
+        if (method_exists($this->di->provider, 'redirect')) {
+            $this->di->provider->redirect();
+        }
     }
 
 
