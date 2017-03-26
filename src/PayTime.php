@@ -44,6 +44,18 @@ class PayTime
 
 
     /**
+     * @param $name
+     * @param $arguments
+     */
+    public function __call($name, $arguments)
+    {
+        if (method_exists($this->di->provider, $name)) {
+            $this->di->provider->$name($arguments);
+        }
+    }
+
+
+    /**
      * @param array $options
      */
     public function setOptions($options = [])
@@ -61,12 +73,19 @@ class PayTime
     }
 
 
+    /**
+     * 发送请求
+     * @return mixed
+     */
     public function send()
     {
         return $this->di->provider->send();
     }
 
 
+    /**
+     * 跳转
+     */
     public function redirect()
     {
         if (method_exists($this->di->provider, 'redirect')) {
@@ -76,7 +95,7 @@ class PayTime
 
 
     /**
-     * @return array(transactionId, transactionReference, isSuccessful,'message);
+     * @return array(transactionId, transactionReference, isSuccessful, message);
      */
     public function notify()
     {

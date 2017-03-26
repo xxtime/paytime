@@ -85,8 +85,23 @@ class Adapter
     }
 
 
+    /**
+     * 响应
+     */
     public function success()
     {
+    }
+
+
+    /**
+     * 仅MyCard卡支付时调用
+     * @param array $avg
+     */
+    public function card($avg = [])
+    {
+        if ($this->channel == 'card') {
+            $this->provider->card($avg);
+        }
     }
 
 }

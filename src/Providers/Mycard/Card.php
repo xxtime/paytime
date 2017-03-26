@@ -11,9 +11,13 @@ class Card
 
     private $sandbox_endpoint_redirect = 'https://test.mycard520.com.tw/MyCardIngame/';
 
+    private $sandbox_endpoint_card = 'https://test.b2b.mycard520.com.tw/MyCardIngameService/Confirm';
+
     private $endpoint_auth = 'https://b2b.mycard520.com.tw/MyCardIngameService/Auth';
 
     private $endpoint_redirect = 'https://redeem.mycard520.com/';
+
+    private $endpoint_card = 'https://b2b.mycard520.com.tw/MyCardIngameService/Confirm';
 
     private $auth_code;     // 授权码
 
@@ -67,6 +71,10 @@ class Card
     }
 
 
+    /**
+     * 发起请求
+     * @return array
+     */
     public function send()
     {
         $result = $this->getAuthCode();
