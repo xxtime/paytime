@@ -290,6 +290,62 @@ class Card
 
 
     /**
+     *  通知回调 文档 3.4
+     *  接口地址:
+     *  传入参数: facId, facMemId, facTradeSeq, tradeSeq, CardId, oProjNo, CardKind, CardPoint, ReturnMsgNo, ErrorMsgNo, ErrorMsg, hash
+     * @throws \Exception
+     */
+    public function notify()
+    {
+        $notice['facId'] = isset($_REQUEST['facId']) ? $_REQUEST['facId'] : '';
+        $notice['facMemId'] = isset($_REQUEST['facMemId']) ? $_REQUEST['facMemId'] : '';
+        $notice['facTradeSeq'] = isset($_REQUEST['facTradeSeq']) ? $_REQUEST['facTradeSeq'] : '';
+        $notice['tradeSeq'] = isset($_REQUEST['tradeSeq']) ? $_REQUEST['tradeSeq'] : '';
+        $notice['CardId'] = isset($_REQUEST['CardId']) ? $_REQUEST['CardId'] : '';
+        $notice['oProjNo'] = isset($_REQUEST['oProjNo']) ? $_REQUEST['oProjNo'] : '';
+        $notice['CardKind'] = isset($_REQUEST['CardKind']) ? $_REQUEST['CardKind'] : '';
+        $notice['CardPoint'] = isset($_REQUEST['CardPoint']) ? $_REQUEST['CardPoint'] : '';
+        $notice['ReturnMsgNo'] = isset($_REQUEST['ReturnMsgNo']) ? $_REQUEST['ReturnMsgNo'] : '';
+        $notice['ErrorMsgNo'] = isset($_REQUEST['ErrorMsgNo']) ? $_REQUEST['ErrorMsgNo'] : '';
+        $notice['ErrorMsg'] = isset($_REQUEST['ErrorMsg']) ? $_REQUEST['ErrorMsg'] : '';
+        $hash = isset($_REQUEST['hash']) ? $_REQUEST['hash'] : '';
+
+        // 签名验证
+        $str = '';
+        $str .= $this->config['app_key1'];
+        $str .= $notice['facId'];
+        $str .= $notice['facMemId'];
+        $str .= $notice['facTradeSeq'];
+        $str .= $notice['tradeSeq'];
+        $str .= $notice['CardId'];
+        $str .= $notice['oProjNo'];
+        $str .= $notice['CardKind'];
+        $str .= $notice['CardPoint'];
+        $str .= $notice['ReturnMsgNo'];
+        $str .= $notice['ErrorMsgNo'];
+        $str .= $notice['ErrorMsg'];
+        $str .= $this->config['app_key2'];
+
+        $transactionId = $notice['facTradeSeq'];
+
+        if (hash('sha256', $str) != $hash) {
+            throw new \Exception('sign error');
+        }
+
+        $result = [
+            'isSuccessful'         => true,
+            'message'              => 'success',
+            'transactionId'        => $transactionId,
+            'transactionReference' => $notice['tradeSeq'],
+            'amount'               => $notice['CardPoint'],
+            'currency'             => 'TWD',
+            'raw'                  => $notice,
+        ];
+        return $result;
+    }
+
+
+    /**
      * curl request
      * @param string $url
      * @return mixed
