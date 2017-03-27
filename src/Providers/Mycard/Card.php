@@ -13,11 +13,15 @@ class Card
 
     private $sandbox_endpoint_card = 'https://test.b2b.mycard520.com.tw/MyCardIngameService/Confirm';
 
+    private $sandbox_endpoint_query = 'https://test.b2b.mycard520.com.tw/MyCardIngameService/CheckTradeStatus';
+
     private $endpoint_auth = 'https://b2b.mycard520.com.tw/MyCardIngameService/Auth';
 
     private $endpoint_redirect = 'https://redeem.mycard520.com/';
 
     private $endpoint_card = 'https://b2b.mycard520.com.tw/MyCardIngameService/Confirm';
+
+    private $endpoint_query = 'https://b2b.mycard520.com.tw/MyCardIngameService/CheckTradeStatus';
 
     private $auth_code;     // 授权码
 
@@ -58,8 +62,8 @@ class Card
                 "{$this->config['app_key1']}{$this->config['app_id']}{$this->parameter['transactionId']}{$this->config['app_key2']}"),
         ];
 
-        $this->endpoint_auth .= '?' . http_build_query($parameter);
-        $response = file_get_contents($this->endpoint_auth);
+        $url = $this->endpoint_auth . '?' . http_build_query($parameter);
+        $response = $this->curl_request($url);
         $result = json_decode($response, true);
 
         if ($result['ReturnMsgNo'] != 1) {
@@ -120,14 +124,156 @@ class Card
 
 
     /**
+     * 文档 DOC 3.2
+     * 接口地址: https://b2b.mycard520.com.tw/MyCardIngameService/Confirm
+     * 传输参数: facId, AuthCode, facMemId, cardId, cardPwd, hash
+     * 返回参数: CardKind, CardPoint, SaveSeq, facTradeSeq, oProjNo, ReturnMsgNo, ReturnMsg
+     * 返回格式: JSON
+     * 返回示例: {"CardKind":0,"CardPoint":0,"SaveSeq":null,"facTradeSeq":null,"oProjNo":null,"ExtensionDat a":null,"ReturnMsg":"參數有誤","ReturnMsgNo":-901}
+     * @param array $card [transaction,user_id,auth,card_no,card_pwd]
+     * @return array
+     * @throws \Exception
+     */
+    public function card($card = [])
+    {
+        //dd($this->config,$card);
+        $err_no = [
+            '-901' => '參數有誤',
+            '-902' => '廠商 ID 有誤',
+            '-903' => 'Hash 有誤',
+            '-904' => '卡號密碼錯誤', // [已儲值] [已凍結]
+        ];
+        $card = $card['0'];
+
+        // clear
+        $search = [' ', '-'];
+        $replace = ['', ''];
+        $card['card_no'] = str_replace($search, $replace, strtoupper($card['card_no']));
+        $card['card_pwd'] = str_replace($search, $replace, strtoupper($card['card_pwd']));
+
+        // 确认交易并请款
+        $key1 = $this->config['app_key1'];
+        $key2 = $this->config['app_key2'];
+        $user_id = $card['user_id'];
+        $param = array(
+            'facId'    => $this->config['app_id'],
+            'AuthCode' => $card['auth'],
+            'facMemId' => $user_id,
+            'cardId'   => $card['card_no'],
+            'cardPwd'  => $card['card_pwd'],
+            'hash'     => hash('sha256',
+                "{$key1}{$this->config['app_id']}{$card['auth']}{$user_id}{$card['card_no']}{$card['card_pwd']}{$key2}")
+        );
+        if ($this->config['sandbox'] == 1) {
+            $this->endpoint_card = $this->sandbox_endpoint_card;
+        }
+        $url = $this->endpoint_card . '?' . http_build_query($param);
+        $output = $this->curl_request($url);
+
+        /**
+         * TODO:: 请款超时
+         * 问题多发生在此处(此时多半请求成功,只是响应超时)
+         * 通常请求失败后用户重新提交然后报ReturnMsgNo:-904错误(即已使用错误)
+         */
+        if ($output === false) {
+            // 网关订单查询
+            try {
+                $query_info = $this->query(['transactionId' => $card['transaction']]);
+                return $query_info;
+            } catch (\Exception $e) {
+                return $e;
+            }
+            throw new \Exception("curl request failed");
+        }
+
+
+        /**
+         * TODO :: 由于此处失败不会返回可利用信息, 如:facTradeSeq等
+         * 无法根据订单ID进一步验证(需上面出错时卡号与订单关联), 所以即使上面使用超时多次请求也无作用.
+         * 已使用卡返回信息: ReturnMsgNo:-904,facTradeSeq:null
+         * {"CardKind":0,"CardPoint":0,"SaveSeq":null,"facTradeSeq":null,"oProjNo":null,"ExtensionData":null,"ReturnMsg":"卡號或密碼錯誤,請確認後重新輸入!","ReturnMsgNo":-904}
+         * {"CardKind":0,"CardPoint":0,"SaveSeq":null,"facTradeSeq":null,"oProjNo":null,"ExtensionData":null,"ReturnMsg":"您好,此張儲值卡訊息[已儲值],請聯絡MyCard客服人員(02)2651-0754或利用線上客服查詢狀況造成您的不便,請多多見諒","ReturnMsgNo":-904}
+         * {"CardKind":0,"CardPoint":0,"SaveSeq":null,"facTradeSeq":null,"oProjNo":null,"ExtensionData":null,"ReturnMsg":"您好,此張儲值卡訊息[已凍結],請聯絡MyCard客服人員(02)2651-0754或利用線上客服查詢狀況造成您的不便,請多多見諒","ReturnMsgNo":-904}
+         */
+        $response = json_decode($output, true);
+        if ($response['ReturnMsgNo'] != 1) {
+            if ($response['ReturnMsgNo'] == '-904') {
+                throw new \Exception($response['ReturnMsg']);
+            }
+            return [
+                'isSuccessful' => false,
+                'message'      => 'failed',
+            ];
+        }
+
+
+        // MyCard货币类型只能TWD
+        return [
+            'isSuccessful'         => true,
+            'message'              => 'success',
+            'transactionId'        => $card['transaction'],
+            'transactionReference' => $response['SaveSeq'],
+            'amount'               => $response['CardPoint'],
+            'currency'             => 'TWD',
+            'raw'                  => $response
+        ];
+    }
+
+
+    /**
      * 查询交易状态 DOC 3.5
      * 接口地址: https://b2b.mycard520.com.tw/MyCardIngameService/CheckTradeStatus
      * 传输参数: facId, facTradeSeq, hash
      * 返回参数: MyCardId, TradeStatus, CardKind, CardPoint, Save_Seq, oProjNo, ReturnMsgNo, ReturnMsg
      * 返回格式: JSON
+     * 返回示例: {"MyCardId":null,"TradeStatus":0,"ExtensionData":null,"ReturnMsg":"參數有誤 ","ReturnMsgNo":-901}
+     * @param array $param
+     * @return bool
+     * @throws \Exception
      */
-    public function query_status()
+    public function query($param = [])
     {
+        if (empty($param['transactionId'])) {
+            return false;
+        }
+        $data = [
+            'facId'       => $this->config['app_id'],
+            'facTradeSeq' => $param['transactionId'],
+            'hash'        => hash('sha256',
+                "{$this->config['app_key1']}{$this->config['app_id']}{$param['transactionId']}{$this->config['app_key2']}")
+        ];
+        if ($this->config['sandbox'] == 1) {
+            $this->endpoint_query = $this->sandbox_endpoint_query;
+        }
+        $url = $this->endpoint_query . '?' . http_build_query($data);
+        $output = $this->curl_request($url);
+        if ($output === false) {
+            throw new \Exception('curl request failed');
+        }
+
+        $response = json_decode($output, true);
+        if ($response['ReturnMsgNo'] != 1) {
+            throw new \Exception($response['ReturnMsg']);
+        }
+
+
+        if ($response['TradeStatus'] != 3) {
+            return [
+                'isSuccessful' => false,
+                'message'      => $response['ReturnMsg'],
+            ];
+        }
+
+        return [
+            'isSuccessful'         => true,
+            'message'              => 'success',
+            'transactionId'        => $param['transactionId'],
+            'transactionReference' => $response['Save_Seq'],
+            'amount'               => $response['CardPoint'],
+            'currency'             => 'TWD',
+            'card_no'              => $response['MyCardId'],
+            'raw'                  => $response
+        ];
     }
 
 
@@ -140,6 +286,27 @@ class Card
      */
     public function query_transaction()
     {
+    }
+
+
+    /**
+     * curl request
+     * @param string $url
+     * @return mixed
+     */
+    private function curl_request($url = '')
+    {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_POST, 0);
+        $output = curl_exec($ch);
+        curl_close($ch);
+        return $output;
     }
 
 }
