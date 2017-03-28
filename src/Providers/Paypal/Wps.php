@@ -33,7 +33,9 @@ class Wps
     public function setOption($options = [])
     {
         $this->options = $options;
-        if ($this->options['sandbox']) {
+
+        // IPN TEST MODEL
+        if (!empty($_REQUEST['test_ipn'])) {
             $this->endpoint = $this->sandbox_endpoint;
         }
     }
