@@ -2,8 +2,9 @@
 
 /**
  * Express Checkout
- * @see https://github.com/thephpleague/omnipay-paypal
- * @see http://stackoverflow.com/questions/18427110/how-do-i-use-omnipay-to-send-a-payment-without-credit-card-details-using-paypal
+ * @link https://github.com/thephpleague/omnipay-paypal
+ * @link http://stackoverflow.com/questions/16293744/paypal-express-checkout-error-order-total-is-missing-error-10400?answertab=active#tab-top
+ * @link http://stackoverflow.com/questions/18427110/how-do-i-use-omnipay-to-send-a-payment-without-credit-card-details-using-paypal
  */
 namespace Xxtime\PayTime\Providers\Paypal;
 
