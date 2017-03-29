@@ -15,6 +15,12 @@ PayTime移动支付SDK，
 * MyCard
 * Paymentwall
 
+## 支持沙箱测试的网关
+以下网关在回调时支持沙箱测试  
+
+* paymentwall（回调参数：is_test）  
+* paypal（回调参数：test_ipn）  
+
 ___
 
 ## 所需环境
@@ -34,7 +40,6 @@ ___
 ```php
 <?php
 
-// 发起充值
 use Xxtime\PayTime\PayTime;
 
 // 不同网关方法略有区别
@@ -79,12 +84,11 @@ try {
 }
 ```
 
-___
+## 回调方法
 
 ```php
 <?php
 
-// 充值回调
 use Xxtime\PayTime\PayTime;
 
 // 订单验证

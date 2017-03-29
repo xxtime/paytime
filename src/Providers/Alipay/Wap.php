@@ -3,13 +3,13 @@
 /**
  * @link https://github.com/lokielse/omnipay-alipay/wiki/Aop-WAP-Gateway
  */
-namespace Xxtime\PayTime\Providers;
+namespace Xxtime\PayTime\Providers\Alipay;
 
 
 use Omnipay\Omnipay;
 use Exception;
 
-class Alipay
+class Wap
 {
 
     private $provider;
@@ -71,7 +71,7 @@ class Alipay
         try {
             $response = $request->send();
             if (!$response->isPaid()) {
-                throw new Exception('sorry failed');
+                throw new Exception('failed');
             }
 
             $result = [
