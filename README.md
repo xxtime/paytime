@@ -15,6 +15,34 @@ PayTime移动支付SDK，
 * MyCard
 * Paymentwall
 
+## 子网关参数
+* Alipay支付宝  
+    1. wap - 网页支付  
+    2. app - APP SDK支付  
+* PayPal  
+    1. wps - 标准网页支付  
+    2. express - 快速支付，支持信用卡  
+* MyCard  
+    1. card - 卡类支付  
+    2. telecom - 电信类支付  
+    3. wallet - 会员钱包支付  
+* Mol  
+    1. 1 - MOLPoints E-Wallet  
+    2. 2 - Rixty E-Wallet / Prepaid Card  
+    3. 3 - MOLPoints Prepaid Card  
+    4. 7 - NganLuong Prepaid Card  
+    5. 8 - Easy2Pay Carrier Billing  
+    6. 9 - GameSultan E-Wallet  
+    7. 10 - MOLPay Credit Card  
+    8. 11 - PayPal E-Wallet  
+    9. 12 - FPX Online-Banking  
+    10. 13 - Maybank2U Online-Banking 
+    11. 14 - DragonPay Online-Banking  
+    12. 601 - AIS 12 Call Prepaid Card  
+    13. 602 - True Money Prepaid Card  
+    14. 603 - Happy Prepaid Card  
+    15. 605 - MOLPoints Prepaid Card  
+
 ## 支持沙箱测试的网关
 以下网关在回调时支持沙箱测试  
 
