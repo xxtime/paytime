@@ -26,7 +26,7 @@ class Telecom
 
     private $parameters;    // 产品参数
 
-    private $sandbox = true;
+    private $sandbox = false;
 
     private $redirect;
 
