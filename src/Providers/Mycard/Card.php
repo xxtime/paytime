@@ -4,6 +4,8 @@
 namespace Xxtime\PayTime\Providers\Mycard;
 
 
+use Xxtime\PayTime\DefaultException;
+
 class Card
 {
 
@@ -67,7 +69,7 @@ class Card
         $result = json_decode($response, true);
 
         if ($result['ReturnMsgNo'] != 1) {
-            throw new \Exception($result['ReturnMsg']);
+            throw new DefaultException($result['ReturnMsg']);
         }
         $this->auth_code = $result['AuthCode'];
 
@@ -101,7 +103,7 @@ class Card
      * 文档 DOC 3.3
      * 接口地址: https://redeem.mycard520.com
      * 传输参数: AuthCode, facId, facMemId, hash
-     * @throws \Exception
+     * @throws DefaultException
      */
     private function redirect()
     {
@@ -132,7 +134,7 @@ class Card
      * 返回示例: {"CardKind":0,"CardPoint":0,"SaveSeq":null,"facTradeSeq":null,"oProjNo":null,"ExtensionDat a":null,"ReturnMsg":"參數有誤","ReturnMsgNo":-901}
      * @param array $card [transaction,user_id,auth,card_no,card_pwd]
      * @return array
-     * @throws \Exception
+     * @throws DefaultException
      */
     public function card($card = [])
     {
@@ -180,10 +182,10 @@ class Card
             try {
                 $query_info = $this->query(['transactionId' => $card['transaction']]);
                 return $query_info;
-            } catch (\Exception $e) {
+            } catch (DefaultException $e) {
                 return $e;
             }
-            throw new \Exception("curl request failed");
+            throw new DefaultException("curl request failed");
         }
 
 
@@ -198,7 +200,7 @@ class Card
         $response = json_decode($output, true);
         if ($response['ReturnMsgNo'] != 1) {
             if ($response['ReturnMsgNo'] == '-904') {
-                throw new \Exception($response['ReturnMsg']);
+                throw new DefaultException($response['ReturnMsg']);
             }
             return [
                 'isSuccessful' => false,
@@ -229,7 +231,7 @@ class Card
      * 返回示例: {"MyCardId":null,"TradeStatus":0,"ExtensionData":null,"ReturnMsg":"參數有誤 ","ReturnMsgNo":-901}
      * @param array $param
      * @return bool
-     * @throws \Exception
+     * @throws DefaultException
      */
     public function query($param = [])
     {
@@ -248,12 +250,12 @@ class Card
         $url = $this->endpoint_query . '?' . http_build_query($data);
         $output = $this->curl_request($url);
         if ($output === false) {
-            throw new \Exception('curl request failed');
+            throw new DefaultException('curl request failed');
         }
 
         $response = json_decode($output, true);
         if ($response['ReturnMsgNo'] != 1) {
-            throw new \Exception($response['ReturnMsg']);
+            throw new DefaultException($response['ReturnMsg']);
         }
 
 
@@ -293,7 +295,7 @@ class Card
      *  通知回调 文档 3.4
      *  接口地址:
      *  传入参数: facId, facMemId, facTradeSeq, tradeSeq, CardId, oProjNo, CardKind, CardPoint, ReturnMsgNo, ErrorMsgNo, ErrorMsg, hash
-     * @throws \Exception
+     * @throws DefaultException
      */
     public function notify()
     {
@@ -329,7 +331,7 @@ class Card
         $transactionId = $notice['facTradeSeq'];
 
         if (hash('sha256', $str) != $hash) {
-            throw new \Exception('sign error');
+            throw new DefaultException('sign error');
         }
 
         $result = [
