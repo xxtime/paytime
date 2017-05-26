@@ -24,7 +24,8 @@ class PayTime
         if ($offset) {
             $gateway = substr($provider, 0, $offset);
             $sub = substr($provider, $offset + 1);
-        } else {
+        }
+        else {
             $gateway = $provider;
             $sub = '';
         }
@@ -56,20 +57,20 @@ class PayTime
 
 
     /**
-     * @param array $options
+     * @param array $option
      */
-    public function setOptions($options = [])
+    public function setOption($option = [])
     {
-        $this->di->provider->setOption($options);
+        $this->di->provider->setOption($option);
     }
 
 
     /**
-     * @param array $options
+     * @param array $option
      */
-    public function purchase($options = [])
+    public function purchase($option = [])
     {
-        $this->di->provider->purchase($options);
+        $this->di->provider->purchase($option);
     }
 
 

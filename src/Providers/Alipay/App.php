@@ -7,7 +7,6 @@ namespace Xxtime\PayTime\Providers\Alipay;
 
 
 use Omnipay\Omnipay;
-use Exception;
 
 class App
 {

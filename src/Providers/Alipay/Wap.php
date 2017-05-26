@@ -7,7 +7,7 @@ namespace Xxtime\PayTime\Providers\Alipay;
 
 
 use Omnipay\Omnipay;
-use Exception;
+use Xxtime\PayTime\DefaultException as Exception;
 
 class Wap
 {

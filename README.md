@@ -74,7 +74,7 @@ use Xxtime\PayTime\PayTime;
 // $payTime = new PayTime('Mycard_card');
 $payTime = new PayTime('Alipay');
 
-$payTime->setOptions(
+$payTime->setOption(
     array(
         'app_id'      => 123456,
         'private_key' => '/path/to/privateKey.pem',
