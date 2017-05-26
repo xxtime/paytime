@@ -52,7 +52,7 @@ class Wallet
             'FactorySeq'       => $option['transactionId'],
             'PointPayment'     => intval($option['amount']),
             'BonusPayment'     => 0,
-            'FactoryReturnUrl' => $this->config['notify_url'],
+            'FactoryReturnUrl' => $this->config['return_url'],
         ];
     }
 
